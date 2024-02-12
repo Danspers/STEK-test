@@ -1,4 +1,10 @@
 import re
+import calendar
+import locale
+import pandas as pd
+
+# Установка русской локализации для календаря
+locale.setlocale(locale.LC_TIME, 'ru_RU')
 
 INPUT_FILE = 'чеки.txt'
 OUTPUT_FILE = 'чеки_по_папкам.txt'
@@ -49,8 +55,14 @@ def main():
     '''
     '''
     receipt_list = open_file(INPUT_FILE)
-    service_list = make_service_list(receipt_list)
-    month_list = make_month_list(receipt_list)
+    month_list = [calendar.month_name[i].lower() for i in range(1, 13)]
+
+    df = pd.DataFrame({'receipt':receipt_list})
+    df['service'] = [re.sub(SERVICE_MASK, '', receipt).lower() for receipt in receipt_list]
+    df['month'] = [re.search(MONTH_MASK, receipt).group(1) for receipt in receipt_list]
+    df['month'] = pd.Categorical(df['month'], month_list)
+    df.sort_values(by=['month', 'service'], inplace=True)
+    df.reset_index(drop=True, inplace=True)
 
 
 if __name__ == "__main__":
