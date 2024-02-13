@@ -52,6 +52,26 @@ def make_month_list(receipt_list:list) -> list:
     return month_list
 
 
+def write_file(file_name:str, service_list:list, month_list:list, df:pd.DataFrame) -> None:
+    '''
+    Функция принимает на вход имя файла в формате txt и записывает в него данные.
+    '''
+    with open(file_name, mode='w', encoding='utf-8-sig') as file:
+        total_delay = []
+        for month in month_list:
+            monthly_delay = service_list.copy()
+            for service in service_list:
+                try:
+                    receipt = df.loc[(month, service), 'receipt']
+                    print('/'+ month +'/'+ receipt, file=file)
+                    monthly_delay.remove(service)
+                except:
+                    pass
+        total_delay.append(monthly_delay)
+
+    print(f'Квитанции рассортированы. Результат сортировки в файле: "{file_name}"')
+
+
 def main():
     '''
     '''
