@@ -15,8 +15,8 @@ MONTH_MASK = r'_([а-яА-ЯёЁ]+)\.'
 
 def open_file(file_name:str) -> list:
     '''
-    Функция принимает на вход имя файла в формате txt.
-    Возвращает его содержимое разделённое по строчкам в виде списка.
+    Функция принимает на вход имя файла (в формате txt) с чеками об оплате услуг ЖКХ.
+    Возвращает список названий файлов с чеками в формате pdf.
     '''
     receipt_list = []
     with open(file_name, mode='r', encoding='utf-8-sig') as file:
@@ -27,7 +27,7 @@ def open_file(file_name:str) -> list:
 
 def make_service_list(receipt_list:list) -> list:
     '''
-    Функция принимает на вход список названий квитанций в формате pdf.
+    Функция принимает на вход список чеков в формате pdf.
     Возвращает перечень предоставляемых услуг ЖКХ.
     '''
     service_list = []
@@ -41,7 +41,7 @@ def make_service_list(receipt_list:list) -> list:
 
 def make_month_list(receipt_list:list) -> list:
     '''
-    Функция принимает на вход список названий квитанций в формате pdf.
+    Функция принимает на вход список чеков в формате pdf.
     Возвращает список месяцев в которые поступала оплата услуг ЖКХ.
     '''
     month_list = []
@@ -54,7 +54,9 @@ def make_month_list(receipt_list:list) -> list:
 
 def write_file(file_name:str, service_list:list, month_list:list, df:pd.DataFrame) -> None:
     '''
-    Функция принимает на вход имя файла в формате txt и записывает в него данные.
+    Функция принимает на вход имя файла в формате txt и записывает в него данные:
+    1. чеки об оплате, рассортированные по папкам месяцев в формате: /месяц/название_файла
+    2. перечень неоплаченных услуг, так же рассортированных по месяцам
     '''
     with open(file_name, mode='w', encoding='utf-8-sig') as file:
         total_delays = []
@@ -80,6 +82,7 @@ def write_file(file_name:str, service_list:list, month_list:list, df:pd.DataFram
 
 def main():
     '''
+    Чтение и сортировка чеков по месяцам и факту оплаты.
     '''
     receipt_list = open_file(INPUT_FILE)
     service_list = make_service_list(receipt_list)
