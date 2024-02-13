@@ -39,19 +39,6 @@ def make_service_list(receipt_list:list) -> list:
     return service_list
 
 
-def make_month_list(receipt_list:list) -> list:
-    '''
-    Функция принимает на вход список чеков в формате pdf.
-    Возвращает список месяцев в которые поступала оплата услуг ЖКХ.
-    '''
-    month_list = []
-    for receipt in receipt_list:
-        month_name = re.search(MONTH_MASK, receipt).group(1)
-        if month_name not in month_list:
-            month_list.append(month_name)
-    return month_list
-
-
 def make_dataframe(receipt_list:list, month_list:list) -> pd.DataFrame:
     '''
     Функция принимает на вход список чеков в формате pdf.
