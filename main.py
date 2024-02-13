@@ -57,18 +57,24 @@ def write_file(file_name:str, service_list:list, month_list:list, df:pd.DataFram
     Функция принимает на вход имя файла в формате txt и записывает в него данные.
     '''
     with open(file_name, mode='w', encoding='utf-8-sig') as file:
-        total_delay = []
+        total_delays = []
         for month in month_list:
-            monthly_delay = service_list.copy()
+            monthly_delay = []
             for service in service_list:
                 try:
                     receipt = df.loc[(month, service), 'receipt']
                     print('/'+ month +'/'+ receipt, file=file)
-                    monthly_delay.remove(service)
                 except:
-                    pass
-        total_delay.append(monthly_delay)
-
+                    monthly_delay.append(service)
+            total_delays.append(monthly_delay)
+        
+        print('\nНе оплачены:', file=file)
+        for delay, month in zip(total_delays, month_list):
+            if delay:
+                print(f'{month}:', file=file)
+                for service in delay:
+                    print(service, file=file)
+        
     print(f'Квитанции рассортированы. Результат сортировки в файле: "{file_name}"')
 
 
