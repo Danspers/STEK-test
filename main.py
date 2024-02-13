@@ -20,8 +20,8 @@ def open_file(file_name:str) -> list:
     '''
     receipt_list = []
     with open(file_name, mode='r', encoding='utf-8-sig') as file:
-        receipt_list = [line[:-1] for line in file]
-    print('Общее кол-во квитанций:', len(receipt_list))
+        receipt_list = [line[:-1].lower() for line in file]
+    print('Общее количество квитанций:', len(receipt_list))
     return receipt_list
 
 
@@ -32,9 +32,10 @@ def make_service_list(receipt_list:list) -> list:
     '''
     service_list = []
     for receipt in receipt_list:
-        service_name = re.sub(SERVICE_MASK, '', receipt)
+        service_name = re.sub(SERVICE_MASK, '', receipt).lower()
         if service_name not in service_list:
             service_list.append(service_name)
+    print(f'Перечень услуг: {service_list} ({len(service_list)}шт.)')
     return service_list
 
 
@@ -55,6 +56,7 @@ def main():
     '''
     '''
     receipt_list = open_file(INPUT_FILE)
+    service_list = make_service_list(receipt_list)
     month_list = [calendar.month_name[i].lower() for i in range(1, 13)]
 
     df = pd.DataFrame({'receipt':receipt_list})
@@ -62,7 +64,10 @@ def main():
     df['month'] = [re.search(MONTH_MASK, receipt).group(1) for receipt in receipt_list]
     df['month'] = pd.Categorical(df['month'], month_list)
     df.sort_values(by=['month', 'service'], inplace=True)
-    df.reset_index(drop=True, inplace=True)
+    df.set_index(['month', 'service'], inplace=True)
+    del receipt_list
+    
+    write_file(OUTPUT_FILE, service_list, month_list, df)
 
 
 if __name__ == "__main__":
