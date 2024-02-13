@@ -52,6 +52,26 @@ def make_month_list(receipt_list:list) -> list:
     return month_list
 
 
+def make_dataframe(receipt_list:list, month_list:list) -> pd.DataFrame:
+    '''
+    Функция принимает на вход список чеков в формате pdf.
+    Возвращает таблицу (DataFrame), состоящую из трёх колонок с типом данных string:
+    - 'month' - месяц оплаты квитанции, записанный прописью, строчными буквами на русском языке.
+    Например: январь, февраль, и т.д.
+    - 'service' - услуга ЖКХ. Названия записаны строчными буквами на русском языке. 
+    - 'receipt' - название файла с чеком об оплате услуги ЖКХ. Например: гвс_январь.pdf
+
+    Колонки month и service - выполняют роль индексации в данной таблице.
+    '''
+    df = pd.DataFrame({'receipt':receipt_list})
+    df['service'] = [re.sub(SERVICE_MASK, '', receipt).lower() for receipt in receipt_list]
+    df['month'] = [re.search(MONTH_MASK, receipt).group(1) for receipt in receipt_list]
+    df['month'] = pd.Categorical(df['month'], month_list)
+    df.sort_values(by=['month', 'service'], inplace=True)
+    df.set_index(['month', 'service'], inplace=True)
+    return df
+
+
 def write_file(file_name:str, service_list:list, month_list:list, df:pd.DataFrame) -> None:
     '''
     Функция принимает на вход имя файла в формате txt и записывает в него данные:
@@ -87,15 +107,7 @@ def main():
     receipt_list = open_file(INPUT_FILE)
     service_list = make_service_list(receipt_list)
     month_list = [calendar.month_name[i].lower() for i in range(1, 13)]
-
-    df = pd.DataFrame({'receipt':receipt_list})
-    df['service'] = [re.sub(SERVICE_MASK, '', receipt).lower() for receipt in receipt_list]
-    df['month'] = [re.search(MONTH_MASK, receipt).group(1) for receipt in receipt_list]
-    df['month'] = pd.Categorical(df['month'], month_list)
-    df.sort_values(by=['month', 'service'], inplace=True)
-    df.set_index(['month', 'service'], inplace=True)
-    del receipt_list
-    
+    df = make_dataframe(receipt_list, month_list)
     write_file(OUTPUT_FILE, service_list, month_list, df)
 
 
